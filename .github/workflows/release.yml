@@ -1,10 +1,11 @@
 # Baut die Windows-Version und veröffentlicht sie als GitHub-Release.
-# Auslöser: ein Tag wie v1.3.1 – die installierten Apps holen sich das Update dann selbst.
+# Auslöser: neue Versionsnummer in package.json auf main – die installierten Apps holen sich das Update dann selbst.
 name: Release
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths: ['package.json']
   workflow_dispatch:
 
 permissions:
@@ -18,17 +19,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Abhängigkeiten
-        run: npm install
-      - name: Version aus Tag prüfen
+      - name: Schon veröffentlicht?
+        id: check
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          PKG=$(node -p "require('./package.json').version")
-          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "$TAG" != "$PKG" ]; then echo "Tag $TAG passt nicht zu package.json $PKG"; exit 1; fi
+          V=$(node -p "require('./package.json').version")
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          if gh release view "v$V" >/dev/null 2>&1; then echo "skip=true" >> "$GITHUB_OUTPUT"; echo "v$V existiert bereits"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Abhängigkeiten
+        if: steps.check.outputs.skip != 'true'
+        run: npm install
       - name: Selbsttest Spracherkennung (Windows)
+        if: steps.check.outputs.skip != 'true'
         run: node -e "const s=require('sherpa-onnx-node'); console.log('sherpa ok', typeof s.OfflineRecognizer)"
       - name: Bauen und veröffentlichen
+        if: steps.check.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx electron-builder --win nsis --x64 --publish always
