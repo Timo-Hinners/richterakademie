@@ -37,6 +37,7 @@ function show(t) {
   document.querySelector('main').scrollTop = 0;
   if (t === 'akten' && !CUR) loadCaseList();
   if (t === 'set') { refreshModel(); loadBackup(); }
+  if (t === 'sw') fillSwCases();
 }
 tabs.forEach(b => b.onclick = () => show(b.dataset.t));
 
@@ -90,7 +91,7 @@ function answer(k, c, order, ob, exp, src, it) {
   if (ok) { Q.score++; S.right++; S.wrong = S.wrong.filter(w => w !== key); } else if (!S.wrong.includes(key)) S.wrong.push(key);
   save();
   $('after').innerHTML = `<div class="explain"><b>${ok ? 'Richtig.' : 'Leider falsch.'}</b> ${exp || ''}<small>${src || ''}</small></div><div class="row" style="margin-top:14px"><button class="btn filled" id="nextQ">${Q.n + 1 < Q.items.length ? 'Weiter' : 'Auswertung'}</button></div>`;
-  $('nextQ').onclick = () => { Q.n++; ask(); }; $('nextQ').focus();
+  $('nextQ').onclick = () => { Q.n++; ask(); };
 }
 function finish() {
   const p = Math.round(Q.score / Q.items.length * 100);
@@ -562,8 +563,21 @@ async function knownNames() {
   } catch (e) { }
   return out;
 }
+const ROLLE = '(?:Name|Vor-?name|Nach-?name|Vollständiger Name|Ingame-?Name|Spitzname|Alias|Angeklagte[rn]?|Beschuldigte[rn]?|Tatverdächtige[rn]?|Verdächtige[rn]?|Täter(?:in)?|Mittäter(?:in)?|Kläger(?:in)?|Beklagte[rn]?|Zeug(?:e|in|en)|Opfer|Geschädigte[rn]?|Beamte[rn]?|Beamtin|Officer|Einsatzleiter(?:in)?|Festnehmende[rn]?|Sachbearbeiter(?:in)?|Aktenführer(?:in)?|Ersteller(?:in)?|Verfasser(?:in)?|Unterzeichner(?:in)?|Richter(?:in)?|Vorsitz(?:ender)?|Staatsanw(?:alt|ältin)|(?:Rechts)?[Aa]nw(?:alt|ältin)|Verteidiger(?:in)?|Mandant(?:in)?|Protokollführer(?:in)?|Sanitäter(?:in)?|Arzt|Ärztin|Fahrer(?:in)?|Halter(?:in)?|Besitzer(?:in)?|Eigentümer(?:in)?|Person(?:alien)?|Beteiligte[rn]?|gez\\.|Unterschrift)';
+const ROLLENZEILE = new RegExp('(?:^|\\n)[ \\t>*•\\-–\\d.)]*' + ROLLE + '[^:\\n]{0,24}:[ \\t]*([^\\n]+)', 'giu');
+const LISTE = /(?:^|\n)[ \t]*[-•*–]\s*([A-ZÄÖÜ][\p{L}'’\-]+(?:\s+[A-ZÄÖÜ][\p{L}'’\-]+){1,3})\s*[(\[,–-]\s*(?:Angeklagte|Beschuldigte|Tatverdächtig|Kläger|Beklagte|Zeug|Opfer|Geschädigt|Beamt|Officer|Anwalt|Anwält|Staatsanw|Richter|Täter|Mittäter)/gu;
+function namesFromValue(v) {
+  // "Officer Lisa Kowalski (DN 204), Marco Saints" → Namen ohne Dienstgrad, Klammern und Nummern
+  return v.replace(/\(.*?\)|\[.*?\]/g, ' ').split(/\s*(?:,|;|\/|\bund\b|&|\s[-–]\s)\s*/).map(part => {
+    const ws = (part.match(/[\p{L}'’\-]+/gu) || []).filter(w => /^[A-ZÄÖÜ]/.test(w) && !TWORD.test(w) && !/^(?:Officer|Ofc|Sgt|Det|Lt|Cpt|Dr|Herr|Herrn|Frau|Mr|Mrs|Ms|Agent|Deputy|Trooper|Ranger|Chief|Captain|Sergeant|Lieutenant|Detective|Corporal|Commander|Major|Junior|Senior|DN|Nr|Dienstnummer|Unbekannt|Keine|Kein|Siehe|Nicht|Offen|Ja|Nein)$/.test(w) && !STOP.has(w.toLowerCase()));
+    return ws.slice(0, 4).join(' ');
+  }).filter(Boolean);
+}
 function localFind(text) {
   const found = [];
+  for (const m of text.matchAll(ROLLENZEILE)) found.push(...namesFromValue(m[1]));
+  for (const m of text.matchAll(LISTE)) found.push(m[1]);
+  for (const m of text.matchAll(/(?:^|\n)[ \t]*(?:gez\.|gezeichnet)[ \t]*:?[ \t]*([A-ZÄÖÜ][\p{L}'’\-]+(?:[ \t]+[A-ZÄÖÜ][\p{L}'’\-]+){0,3})/giu)) found.push(...namesFromValue(m[1]));
   for (const m of text.matchAll(TITEL)) {
     const parts = m[1].split(/\s+/).filter(w => !STOP.has(w.toLowerCase()));
     if (parts.length) found.push(parts.join(' '));
@@ -623,7 +637,36 @@ async function findNames(extra = []) {
   renderSw();
   if (!ki && !SETTINGS.hasClaudeKey) $('swMsg').textContent += ' · Ohne Claude-Schlüssel nur Grundsuche – fehlende Namen antippen.';
 }
-$('swFind').onclick = () => findNames();
+$('swFind').onclick = () => findNames(SW.caseNames || []);
+let SW_CASES = [];
+async function fillSwCases() {
+  try {
+    SW_CASES = await api.listCases(); const cur = $('swCase').value;
+    $('swCase').innerHTML = '<option value="">– Text selbst einfügen –</option>' + SW_CASES.map(c => `<option value="${esc(c.id)}">${esc(c.aktenzeichen)}${c.titel ? ' · ' + esc(c.titel) : ''}</option>`).join('');
+    $('swCase').value = cur;
+  } catch (e) { }
+}
+function caseText(c) {
+  const bet = (c.beteiligte || []).filter(b => b.name).map(b => `- ${b.name} (${b.rolle})`).join('\n');
+  const trans = (c.transcript || []).map(t => `[${fmtT(t.start)}] ${t.who}: ${t.text}`).join('\n');
+  return [(c.bericht || '').replace(/\*\*(.+?)\*\*/g, '$1').trim(), bet && '## Beteiligte\n' + bet, trans && '## Transkript\n' + trans].filter(Boolean).join('\n\n');
+}
+$('swCase').onchange = async () => {
+  SW.caseNames = [];
+  const id = $('swCase').value; if (!id) return;
+  const c = await api.getCase(id); if (!c) return;
+  $('swTitel').value = c.titel || 'Akte'; $('swAz').value = c.aktenzeichen || '';
+  $('swText').value = caseText(c);
+  SW.caseNames = (c.beteiligte || []).map(b => b.name).filter(Boolean);
+  findNames(SW.caseNames);
+};
+$('swFile').onclick = () => $('swFileIn').click();
+$('swFileIn').onchange = async () => {
+  const f = $('swFileIn').files[0]; if (!f) return;
+  $('swText').value = await f.text(); $('swCase').value = ''; SW.caseNames = [];
+  if ($('swTitel').value === 'Akte') $('swTitel').value = f.name.replace(/\.[^.]+$/, '');
+  $('swFileIn').value = ''; findNames();
+};
 $('swText').addEventListener('input', () => { if (!$('swResult').hidden) renderSw(); });
 $('swNum').onchange = () => { if (!$('swResult').hidden) renderSw(); };
 const swAdd = () => { const v = $('swAdd').value.trim(); if (!v) return; addName(v); $('swAdd').value = ''; renderSw(); };
@@ -631,9 +674,10 @@ $('swAddBtn').onclick = swAdd;
 $('swAdd').onkeydown = e => { if (e.key === 'Enter') swAdd(); };
 $('toSw').onclick = () => {
   collect();
-  $('swTitel').value = CUR.titel || 'Bericht'; $('swAz').value = CUR.aktenzeichen || '';
+  $('swTitel').value = CUR.titel || 'Akte'; $('swAz').value = CUR.aktenzeichen || ''; $('swCase').value = CUR.id;
   $('swText').value = (CUR.bericht || '').replace(/\*\*(.+?)\*\*/g, '$1').trim();
-  show('sw'); findNames((CUR.beteiligte || []).map(b => b.name));
+  SW.caseNames = (CUR.beteiligte || []).map(b => b.name).filter(Boolean);
+  show('sw'); findNames(SW.caseNames);
 };
 
 /* ---------- Bild erzeugen ---------- */
@@ -677,7 +721,7 @@ async function swCanvas() {
   g.fillStyle = '#6b6b6b'; g.font = '400 20px ' + SERIF; g.fillText('Corleone City · State of San Andreas · Richterschaft', M + 138, 146);
   g.strokeStyle = '#a8822b'; g.lineWidth = 3; g.beginPath(); g.moveTo(M, 200); g.lineTo(W - M, 200); g.stroke();
   g.lineWidth = 1; g.beginPath(); g.moveTo(M, 207); g.lineTo(W - M, 207); g.stroke();
-  g.fillStyle = '#14203a'; g.font = '700 36px ' + SERIF; g.fillText($('swTitel').value.trim() || 'Bericht', M, 266);
+  g.fillStyle = '#14203a'; g.font = '700 36px ' + SERIF; g.fillText($('swTitel').value.trim() || 'Akte', M, 266);
   g.fillStyle = '#6b6b6b'; g.font = '400 19px ' + SERIF;
   g.fillText([$('swAz').value.trim() && 'Aktenzeichen ' + $('swAz').value.trim(), 'Stand ' + new Date().toLocaleDateString('de-DE'), 'Freigabefassung'].filter(Boolean).join('   ·   '), M, 300);
   // Text
@@ -716,7 +760,7 @@ async function swCanvas() {
   return cv;
 }
 const cvBuf = cv => new Promise(res => cv.toBlob(b => b.arrayBuffer().then(res), 'image/png'));
-const swName = () => 'Geschwaerzt-' + ($('swAz').value.trim() || $('swTitel').value.trim() || 'Bericht').replace(/[\\/:*?"<>|\s]+/g, '-') + '-' + new Date().toISOString().slice(0, 10);
+const swName = () => 'Geschwaerzt-' + ($('swAz').value.trim() || $('swTitel').value.trim() || 'Akte').replace(/[\\/:*?"<>|\s]+/g, '-') + '-' + new Date().toISOString().slice(0, 10);
 $('swSave').onclick = async () => { renderSw(); const f = await api.saveImage(await cvBuf(await swCanvas()), swName()); if (f) toast('Bild gespeichert'); };
 $('swCopy').onclick = async () => { renderSw(); await api.copyImage(await cvBuf(await swCanvas())); toast('Bild kopiert – in Discord mit Strg+V einfügen'); };
 

@@ -14,6 +14,7 @@ process.on('uncaughtException', e => { log('FEHLER', e && e.stack || e); try { d
 process.on('unhandledRejection', e => log('REJECT', e && e.stack || e));
 
 if (!app.requestSingleInstanceLock()) { app.quit(); }
+if (process.platform === 'win32') app.setAppUserModelId('ch.timohinners.richterakademie');
 
 let win;
 const dataDir = () => path.join(app.getPath('userData'), 'akten');
@@ -55,7 +56,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1320, height: 880, minWidth: 440, minHeight: 600, show: false,
     title: 'Richterakademie', backgroundColor: dark ? '#0b0b0d' : '#f5f5f7',
-    icon: path.join(__dirname, 'assets', 'icon.png'),
+    icon: path.join(__dirname, 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
     titleBarStyle: 'hidden',
     titleBarOverlay: { color: '#00000000', symbolColor: dark ? '#f5f5f7' : '#1d1d1f', height: 40 },
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, spellcheck: false }
@@ -279,7 +280,7 @@ ipcMain.handle('redact:find', async (e, text) => {
   const key = dec(readSettings().claudeKey);
   if (!key) return null;
   const s = publicSettings();
-  const prompt = `Finde in folgendem Text (GTA-Roleplay, Deutsch) ALLE Namen von Personen: Vornamen, Nachnamen, vollständige Namen, Spitznamen, Ingame-Namen, auch falsch geschriebene oder abgekürzte Varianten und Namen in Besitzform (z. B. "Saints'"). Keine Orte, Strassen, Firmen, Behörden, Dienstgrade oder Paragraphen.
+  const prompt = `Finde in folgender Akte (GTA-Roleplay, Deutsch; z. B. Ermittlungs-, Einsatz- oder Gerichtsakte) ALLE Namen von Personen – auch in Kopfzeilen, Beteiligtenlisten, Unterschriften und Transkripten: Vornamen, Nachnamen, vollständige Namen, Spitznamen, Ingame-Namen, auch falsch geschriebene oder abgekürzte Varianten und Namen in Besitzform (z. B. "Saints'"). Keine Rollenbezeichnungen (Angeklagter, Beamter, Zeuge …), Dienstgrade, Orte, Strassen, Firmen, Behörden, Fraktionsnamen oder Paragraphen.
 Antworte NUR mit JSON, ohne Erklärung: {"namen":["...", "..."]} – jede Schreibweise genau so, wie sie im Text steht.
 
 TEXT:

@@ -184,14 +184,9 @@
     <div class="card glass doc" id="vBericht"><div class="md" id="mdOut"></div></div>
     <div class="card glass" id="vEdit" hidden><textarea id="mdEdit" rows="24"></textarea></div>
     <div class="card glass" id="vTrans" hidden><div id="transOut" class="trans"></div></div>
-    <div class="row actions">
-      <button class="btn filled" id="genReport">Akte mit KI schreiben</button>
-      <button class="btn tinted" id="reTrans">Neu transkribieren</button>
-      <button class="btn tinted" id="expPdf">Als PDF sichern</button>
-      <button class="btn tinted" id="expMd">Als Text sichern</button>
-      <button class="btn tinted" id="copyUrteil">Urteil kopieren</button>
-      <button class="btn tinted" id="toSw">Geschwärzt teilen</button>
-      <button class="btn plain destructive-text" id="delCase">Löschen</button>
+    <div class="actionbar glass">
+      <div class="row"><button class="btn filled" id="genReport">Akte mit KI schreiben</button><button class="btn tinted" id="reTrans">Neu transkribieren</button></div>
+      <div class="row"><span class="actlabel">Teilen</span><button class="btn tinted small" id="expPdf">PDF</button><button class="btn tinted small" id="expMd">Text</button><button class="btn tinted small" id="copyUrteil">Urteil kopieren</button><button class="btn tinted small" id="toSw">Geschwärzt</button><span class="spacer"></span><button class="btn destructive-text small" id="delCase">Löschen</button></div>
     </div>
     <p class="sub" id="caseMsg"></p>
     <div class="confirm glass" id="delConfirm" hidden><span>Akte und Aufnahmen endgültig löschen?</span><button class="btn destructive" id="delYes">Löschen</button><button class="btn plain" id="delNo">Abbrechen</button></div>
@@ -199,20 +194,21 @@
 </section>
 
 <section id="sw" hidden>
-  <header class="pagehead"><p class="eyebrow">Gericht</p><h1>Schwärzen</h1><p class="lead">Text einfügen, Namen werden automatisch geschwärzt – wie in einer freigegebenen Akte. Danach als Bild speichern oder kopieren und direkt verschicken.</p></header>
+  <header class="pagehead"><p class="eyebrow">Gericht</p><h1>Schwärzen</h1><p class="lead">Akte wählen oder einfügen – alle Namen werden automatisch geschwärzt. Danach als Bild speichern oder kopieren und direkt verschicken.</p></header>
   <div class="card glass">
     <div class="grid">
-      <label class="field wide"><span>Titel</span><input id="swTitel" placeholder="Bericht" value="Bericht"></label>
-      <label class="field"><span>Aktenzeichen (optional)</span><input id="swAz" placeholder="SG-1010-01"></label>
+      <label class="field"><span>Akte aus dem Archiv</span><select id="swCase"><option value="">– Text selbst einfügen –</option></select></label>
+      <label class="field"><span>Titel</span><input id="swTitel" placeholder="Akte" value="Akte"></label>
+      <label class="field"><span>Aktenzeichen</span><input id="swAz" placeholder="SG-1010-01"></label>
     </div>
-    <label class="field" style="margin-top:12px"><span>Text</span><textarea id="swText" rows="9" placeholder="Kompletten Bericht hier einfügen …"></textarea></label>
-    <div class="row"><label class="toggle"><input type="checkbox" id="swNum" checked><i></i>Telefon- und Dienstnummern</label><label class="toggle"><input type="checkbox" id="swStamp" checked><i></i>Stempel „Geschwärzt“</label></div>
+    <label class="field"><span>Text der Akte</span><textarea id="swText" rows="10" placeholder="Komplette Akte hier einfügen – z. B. aus Discord, Google Docs oder dem Aktensystem …"></textarea></label>
+    <div class="row opts-row"><label class="toggle"><input type="checkbox" id="swStamp" checked><i></i>Stempel „Geschwärzt“</label><label class="toggle"><input type="checkbox" id="swNum"><i></i>Auch Telefon- und Dienstnummern</label><span class="spacer"></span><button class="btn plain small" id="swFile">Datei öffnen …</button><input type="file" id="swFileIn" accept=".txt,.md,.text" hidden></div>
     <div class="row actions"><button class="btn filled" id="swFind">Namen schwärzen</button><span class="hint" id="swMsg"></span></div>
   </div>
   <div id="swResult" hidden>
     <h2 class="grouptitle">Geschwärzt</h2>
     <div class="chips" id="swChips"></div>
-    <div class="row"><input id="swAdd" class="grow" placeholder="Weiteren Namen schwärzen, z. B. Saints"><button class="btn tinted" id="swAddBtn">Hinzufügen</button></div>
+    <div class="row"><input id="swAdd" class="grow" placeholder="Fehlenden Namen ergänzen, z. B. Saints"><button class="btn tinted" id="swAddBtn">Hinzufügen</button></div>
     <p class="footnote">Tipp: Auf ein Wort tippen schwärzt es überall – nochmal tippen hebt es wieder auf.</p>
     <div class="card glass paper"><div id="swPreview" class="swprev"></div></div>
     <div class="row actions"><button class="btn filled" id="swSave">Als Bild speichern</button><button class="btn tinted" id="swCopy">Bild kopieren</button></div>

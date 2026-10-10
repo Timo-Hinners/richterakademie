@@ -1,7 +1,7 @@
 {
   "name": "richterakademie",
   "productName": "Richterakademie",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Lern- und Verhandlungs-App für Richter am DOJ Corleone City",
   "main": "main.js",
   "author": "Timo Hinners",
@@ -50,7 +50,7 @@
     ],
     "win": {
       "icon": "assets/icon.ico",
-      "signAndEditExecutable": false,
+      "signAndEditExecutable": true,
       "target": [
         {
           "target": "nsis",
