@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; media-src 'self' blob:; connect-src 'self' blob: data:">
+<title>Richterakademie</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+<div class="titlebar"></div>
+
+<div class="shell">
+<aside class="sidebar glass">
+  <div class="brand">
+    <img src="seal.png" alt="">
+    <div><b>Richterakademie</b><span>Department of Justice</span></div>
+  </div>
+  <nav role="tablist" aria-label="Bereiche">
+    <p class="navlabel">Lernen</p>
+    <button role="tab" data-t="pfad" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M4 19V6a2 2 0 0 1 2-2h12v13H6a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12"/></svg>Lernpfad</button>
+    <button role="tab" data-t="quiz" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.5V14m0 3h.01"/></svg>Quiz</button>
+    <button role="tab" data-t="ref" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6 0-8 1.5Zm0 0v14"/></svg>Nachschlagen</button>
+    <button role="tab" data-t="tools" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h3.5"/></svg>Rechner</button>
+    <p class="navlabel">Gericht</p>
+    <button role="tab" data-t="rec" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Verhandlung<span class="live" id="liveDot" hidden></span></button>
+    <button role="tab" data-t="akten" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/></svg>Akten</button>
+    <button role="tab" data-t="sw" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="4" rx="1"/><rect x="3" y="14" width="11" height="4" rx="1"/><path d="M17 16h4"/></svg>Schwärzen</button>
+    <p class="navlabel">App</p>
+    <button role="tab" data-t="set" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>Einstellungen</button>
+  </nav>
+  <div class="caps"><span>Deckel für jedes Urteil</span><div><b>90</b> HE</div><div><b>100.000</b> $</div></div>
+</aside>
+
+<main class="content">
+
+<section id="pfad">
+  <header class="pagehead"><p class="eyebrow">Ausbildung Richter a. P.</p><h1>Lernpfad</h1><p class="lead">Fünf Stufen in der Reihenfolge deiner Ausbildung. Ab 80 % wird die nächste Stufe freigeschaltet, falsche Antworten kommen in den Wiederholungsstapel.</p></header>
+  <div class="stats glass">
+    <div><b id="sDone">0/5</b><span>Stufen bestanden</span></div>
+    <div><b id="sRight">0</b><span>Richtig beantwortet</span></div>
+    <div><b id="sWrong">0</b><span>Zu wiederholen</span></div>
+  </div>
+  <div class="levels" id="levels"></div>
+  <div class="row actions">
+    <button class="btn tinted" id="repeatBtn">Fehler wiederholen</button>
+    <button class="btn tinted" id="examBtn">Prüfungsmodus · 20 Fragen</button>
+    <button class="btn plain" id="resetBtn">Fortschritt zurücksetzen</button>
+  </div>
+  <div class="confirm glass" id="resetConfirm" hidden><span>Gesamten Lernfortschritt löschen?</span><button class="btn destructive" id="resetYes">Zurücksetzen</button><button class="btn plain" id="resetNo">Abbrechen</button></div>
+</section>
+
+<section id="quiz" hidden>
+  <header class="pagehead"><p class="eyebrow">Quiz</p><h1 id="quizTitle">Quiz</h1></header>
+  <div class="card glass quiz" id="quizBox"><p class="lead">Wähle im Lernpfad eine Stufe, um zu starten.</p></div>
+</section>
+
+<section id="ref" hidden>
+  <header class="pagehead"><p class="eyebrow">Wissen</p><h1>Nachschlagen</h1><p class="lead">Leitfaden, Strafprozessordnung und Vorlagen kompakt an einem Ort.</p></header>
+  <div class="search glass"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="refSearch" placeholder="Suchen, z. B. Bewährung, §45, Ticket"></div>
+  <div id="refList" class="reflist"></div>
+</section>
+
+<section id="tools" hidden>
+  <header class="pagehead"><p class="eyebrow">Werkzeuge</p><h1>Rechner</h1></header>
+  <div class="card glass">
+    <h3>Gesamtstrafe bei offener Fahndung</h3>
+    <p class="sub">StPO §19: unter 90 HE addieren, darüber 2/3 – nie über 90 HE und 100.000 $.</p>
+    <div class="grid">
+      <label class="field"><span>Neue Tat (HE)</span><input id="g1" type="number" min="0" max="90" value="60"></label>
+      <label class="field"><span>Offene Fahndung (HE)</span><input id="g2" type="number" min="0" max="90" value="90"></label>
+      <label class="field"><span>Geld neue Tat ($)</span><input id="m1" type="number" min="0" value="25000"></label>
+      <label class="field"><span>Geld Fahndung ($)</span><input id="m2" type="number" min="0" value="40000"></label>
+    </div>
+    <div class="result-line" id="gOut"></div>
+  </div>
+  <div class="card glass">
+    <h3>Ticket-Name</h3>
+    <p class="sub">Im Discord-Ticket mit /rename einfügen.</p>
+    <div class="grid">
+      <label class="field"><span>Status</span><select id="tc"><option value="🟡">🟡 In Bearbeitung</option><option value="🔵">🔵 Termin festgelegt</option><option value="🟢">🟢 Erledigt</option><option value="🔴">🔴 Abgelehnt</option></select></label>
+      <label class="field"><span>Art</span><select id="tt"><option>Klage</option><option>Revision</option><option>Scheidung</option><option>Akte</option></select></label>
+      <label class="field"><span>Nachname Mandant</span><input id="tm" value="Mustermann"></label>
+      <label class="field"><span>Nachname Richter</span><input id="tr" value="Hinners"></label>
+      <label class="field"><span>Termin (TT.MM)</span><input id="td" placeholder="22.08"></label>
+    </div>
+    <div class="result-line mono" id="tOut"></div>
+    <div class="row"><button class="btn filled" id="tCopy">Kopieren</button><span class="hint" id="tMsg"></span></div>
+  </div>
+  <div class="card glass">
+    <h3>Urteilsformel SG</h3>
+    <div class="grid">
+      <label class="field"><span>Geldstrafe ($)</span><input id="uG" type="number" min="0" max="100000" value="35000"></label>
+      <label class="field"><span>Hafteinheiten</span><input id="uH" type="number" min="0" max="90" value="45"></label>
+      <label class="field"><span>StVO-Punkte</span><input id="uP" type="number" min="0"></label>
+      <label class="field"><span>Dienstnummer</span><input id="uD" value="DOJ-XX"></label>
+    </div>
+    <div class="row"><label class="toggle"><input type="checkbox" id="uF"><i></i>Führerscheinentzug</label><label class="toggle"><input type="checkbox" id="uW"><i></i>Waffenscheinentzug</label></div>
+    <pre id="uOut"></pre>
+    <div class="row"><button class="btn filled" id="uCopy">Kopieren</button><span class="hint" id="uMsg"></span></div>
+  </div>
+</section>
+
+<section id="rec" hidden>
+  <header class="pagehead"><p class="eyebrow">Gericht</p><h1>Verhandlung</h1><p class="lead">Nimmt dein Mikrofon und den Windows-Ton (TeamSpeak / SaltyChat) getrennt auf. Danach entsteht automatisch eine Akte mit Schlussfolgerung.</p></header>
+
+  <div class="recorder glass">
+    <button class="recbtn" id="recBtn" aria-label="Aufnahme starten"><span></span></button>
+    <div class="rectime"><b id="recTime">00:00</b><span id="recState">Bereit zur Aufnahme</span></div>
+    <div class="meters">
+      <div class="meter"><span>Du</span><div class="bar"><i id="mMic"></i></div></div>
+      <div class="meter"><span>TeamSpeak</span><div class="bar"><i id="mSys"></i></div></div>
+    </div>
+  </div>
+  <div class="markbar glass">
+    <input id="markText" placeholder="Markierung setzen, z. B. Geständnis, Anwalt eingetroffen" disabled>
+    <button class="btn tinted" id="markBtn" disabled>Markieren</button>
+  </div>
+  <ul class="marks" id="markList"></ul>
+
+  <div class="card glass" id="procBox" hidden>
+    <h3>Auswertung</h3>
+    <ol class="steps" id="steps">
+      <li data-s="save"><i></i>Aufnahme sichern</li>
+      <li data-s="model"><i></i>Sprachmodell bereitstellen</li>
+      <li data-s="mic"><i></i>Deine Spur erkennen</li>
+      <li data-s="sys"><i></i>TeamSpeak-Spur erkennen</li>
+      <li data-s="report"><i></i>Akte schreiben</li>
+    </ol>
+    <div class="progress" id="procBar" hidden><i></i></div>
+    <p class="sub" id="procMsg"></p>
+  </div>
+
+  <h2 class="grouptitle">Verfahren</h2>
+  <div class="card glass">
+    <div class="grid">
+      <label class="field"><span>Verfahren</span><select id="cArt"><option>SG-Urteil</option><option>Eilverfahren</option><option>Hauptverhandlung</option><option>Revision</option><option>Zivilklage</option><option>Anhörung</option><option>Sonstiges</option></select></label>
+      <label class="field"><span>Aktenzeichen</span><input id="cAz" placeholder="SG-1010-01"></label>
+      <label class="field wide"><span>Titel</span><input id="cTitel" placeholder="Raub Juwelier, Familie Saints"></label>
+    </div>
+    <p class="fieldlabel">Beteiligte</p>
+    <div id="betList" class="bet"></div>
+    <button class="btn plain small" id="betAdd">+ Person hinzufügen</button>
+    <label class="field" style="margin-top:14px"><span>Notizen</span><textarea id="cNotiz" rows="3" placeholder="Akte vollständig? Rechte verlesen? Kooperativ?"></textarea></label>
+    <p class="sub">Sag den Beteiligten zu Beginn, dass die Verhandlung für die Akte aufgezeichnet wird.</p>
+  </div>
+</section>
+
+<section id="akten" hidden>
+  <div id="caseListView">
+    <header class="pagehead"><p class="eyebrow">Archiv</p><h1>Akten</h1></header>
+    <div class="row toolbar">
+      <div class="search glass grow"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="caseSearch" placeholder="Aktenzeichen, Titel oder Verfahren"></div>
+      <button class="btn tinted" id="openFolder">Ordner öffnen</button>
+      <button class="btn tinted" id="importAudio">Audio importieren</button>
+      <button class="btn filled" id="newCase">Neue Akte</button>
+    </div>
+    <div id="caseList" class="list glass"></div>
+  </div>
+
+  <div id="caseView" hidden>
+    <button class="back" id="backList"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>Akten</button>
+    <header class="pagehead tight"><p class="eyebrow" id="caseEyebrow"></p><h1 id="caseTitle">Akte</h1></header>
+    <div class="card glass">
+      <div class="grid">
+        <label class="field"><span>Aktenzeichen</span><input id="eAz"></label>
+        <label class="field"><span>Titel</span><input id="eTitel"></label>
+        <label class="field"><span>Verfahren</span><input id="eArt"></label>
+        <label class="field"><span>Status</span><select id="eStatus"><option>Offen</option><option>Urteil gesprochen</option><option>Vertagt</option><option>Abgeschlossen</option></select></label>
+      </div>
+    </div>
+    <div class="card glass">
+      <h3>Strafmaß</h3>
+      <div class="grid">
+        <label class="field"><span>Hafteinheiten · max. 90</span><input id="sHE" type="number" min="0" max="90"></label>
+        <label class="field"><span>Geldstrafe $ · max. 100.000</span><input id="sGeld" type="number" min="0" max="100000"></label>
+        <label class="field"><span>StVO-Punkte</span><input id="sStvo" type="number" min="0"></label>
+      </div>
+      <div class="row"><label class="toggle"><input type="checkbox" id="sFS"><i></i>Führerscheinentzug</label><label class="toggle"><input type="checkbox" id="sWS"><i></i>Waffenscheinentzug</label><label class="toggle"><input type="checkbox" id="sBew"><i></i>Bewährung</label></div>
+      <p class="sub" id="capNote"></p>
+    </div>
+    <div class="segmented" role="tablist"><button class="t2 on" data-v="bericht">Akte</button><button class="t2" data-v="edit">Bearbeiten</button><button class="t2" data-v="trans">Transkript</button></div>
+    <div class="card glass doc" id="vBericht"><div class="md" id="mdOut"></div></div>
+    <div class="card glass" id="vEdit" hidden><textarea id="mdEdit" rows="24"></textarea></div>
+    <div class="card glass" id="vTrans" hidden><div id="transOut" class="trans"></div></div>
+    <div class="row actions">
+      <button class="btn filled" id="genReport">Akte mit KI schreiben</button>
+      <button class="btn tinted" id="reTrans">Neu transkribieren</button>
+      <button class="btn tinted" id="expPdf">Als PDF sichern</button>
+      <button class="btn tinted" id="expMd">Als Text sichern</button>
+      <button class="btn tinted" id="copyUrteil">Urteil kopieren</button>
+      <button class="btn tinted" id="toSw">Geschwärzt teilen</button>
+      <button class="btn plain destructive-text" id="delCase">Löschen</button>
+    </div>
+    <p class="sub" id="caseMsg"></p>
+    <div class="confirm glass" id="delConfirm" hidden><span>Akte und Aufnahmen endgültig löschen?</span><button class="btn destructive" id="delYes">Löschen</button><button class="btn plain" id="delNo">Abbrechen</button></div>
+  </div>
+</section>
+
+<section id="sw" hidden>
+  <header class="pagehead"><p class="eyebrow">Gericht</p><h1>Schwärzen</h1><p class="lead">Text einfügen, Namen werden automatisch geschwärzt – wie in einer freigegebenen Akte. Danach als Bild speichern oder kopieren und direkt verschicken.</p></header>
+  <div class="card glass">
+    <div class="grid">
+      <label class="field wide"><span>Titel</span><input id="swTitel" placeholder="Bericht" value="Bericht"></label>
+      <label class="field"><span>Aktenzeichen (optional)</span><input id="swAz" placeholder="SG-1010-01"></label>
+    </div>
+    <label class="field" style="margin-top:12px"><span>Text</span><textarea id="swText" rows="9" placeholder="Kompletten Bericht hier einfügen …"></textarea></label>
+    <div class="row"><label class="toggle"><input type="checkbox" id="swNum" checked><i></i>Telefon- und Dienstnummern</label><label class="toggle"><input type="checkbox" id="swStamp" checked><i></i>Stempel „Geschwärzt“</label></div>
+    <div class="row actions"><button class="btn filled" id="swFind">Namen schwärzen</button><span class="hint" id="swMsg"></span></div>
+  </div>
+  <div id="swResult" hidden>
+    <h2 class="grouptitle">Geschwärzt</h2>
+    <div class="chips" id="swChips"></div>
+    <div class="row"><input id="swAdd" class="grow" placeholder="Weiteren Namen schwärzen, z. B. Saints"><button class="btn tinted" id="swAddBtn">Hinzufügen</button></div>
+    <p class="footnote">Tipp: Auf ein Wort tippen schwärzt es überall – nochmal tippen hebt es wieder auf.</p>
+    <div class="card glass paper"><div id="swPreview" class="swprev"></div></div>
+    <div class="row actions"><button class="btn filled" id="swSave">Als Bild speichern</button><button class="btn tinted" id="swCopy">Bild kopieren</button></div>
+  </div>
+</section>
+
+<section id="set" hidden>
+  <header class="pagehead"><p class="eyebrow">App</p><h1>Einstellungen</h1></header>
+  <h2 class="grouptitle">Profil</h2>
+  <div class="inset glass">
+    <label class="cell"><span>Name im Spiel</span><input id="stName" placeholder="Timo Hinners"></label>
+    <label class="cell"><span>Dienstnummer</span><input id="stDn"></label>
+    <label class="cell"><span>Rang</span><input id="stRang"></label>
+  </div>
+  <h2 class="grouptitle">Aufnahme &amp; Spracherkennung</h2>
+  <div class="inset glass">
+    <label class="cell"><span>Mikrofon</span><select id="stMic"></select></label>
+    <label class="cell"><span>Erkennung</span><select id="stEngine"><option value="lokal">Auf diesem PC (offline, kostenlos)</option><option value="openai">OpenAI Whisper (API-Schlüssel)</option></select></label>
+    <label class="cell"><span>Sprachmodell</span><select id="stWhisper"><option value="small">Whisper Small · genau · 640 MB</option><option value="base">Whisper Base · schnell · 210 MB</option></select></label>
+    <div class="cell"><span>Modellstatus</span><span class="value" id="modelState">–</span><button class="btn tinted small" id="modelDl">Jetzt laden</button></div>
+  </div>
+  <p class="footnote">Das Sprachmodell wird einmalig geladen und danach offline genutzt.</p>
+  <h2 class="grouptitle">KI für die Akte</h2>
+  <div class="inset glass">
+    <label class="cell"><span>Claude-API-Schlüssel <em id="keyState" class="pill"></em></span><input id="stKey" type="password" placeholder="sk-ant-…"></label>
+    <label class="cell"><span>Claude-Modell</span><input id="stModel"></label>
+    <label class="cell"><span>OpenAI-Schlüssel <em id="okeyState" class="pill"></em></span><input id="stOKey" type="password" placeholder="nur für OpenAI-Erkennung"></label>
+  </div>
+  <p class="footnote">Schlüssel werden verschlüsselt auf diesem PC gespeichert. Einen Claude-Schlüssel erhältst du unter console.anthropic.com. Ohne Schlüssel entsteht eine Vorlage mit Transkript.</p>
+  <h2 class="grouptitle">Updates &amp; Datensicherung</h2>
+  <div class="inset glass">
+    <div class="cell"><span>Version</span><span class="value" id="updState">–</span><button class="btn tinted small" id="updBtn">Nach Updates suchen</button></div>
+    <div class="cell"><span>Letzte Sicherung</span><span class="value" id="bkLast">–</span><button class="btn tinted small" id="bkNow">Jetzt sichern</button></div>
+    <div class="cell"><span>Sicherungen</span><span class="value"><button class="btn plain small" id="bkOpen">Ordner öffnen</button><button class="btn plain small" id="bkRestore">Wiederherstellen …</button></span></div>
+  </div>
+  <p class="footnote" id="bkInfo">Updates werden automatisch geladen und beim nächsten Neustart installiert. Akten, Aufnahmen, Lernfortschritt und Einstellungen bleiben dabei immer erhalten – zusätzlich legt die App täglich und vor jedem Update eine Sicherung in „Dokumente\Richterakademie\Sicherungen“ an.</p>
+  <h2 class="grouptitle">Darstellung</h2>
+  <div class="inset glass">
+    <div class="cell"><span>Erscheinungsbild</span><div class="segmented small" id="themeSeg"><button data-th="light">Hell</button><button data-th="dark">Dunkel</button><button data-th="system">System</button></div></div>
+  </div>
+  <div class="row actions"><button class="btn filled" id="stSave">Speichern</button><span class="hint" id="stMsg"></span></div>
+  <p class="footnote" id="verInfo"></p>
+</section>
+
+</main>
+</div>
+<div class="toast glass" id="toast" hidden></div>
+<div class="updbar glass" id="updBar" hidden><span id="updText">Update bereit</span><button class="btn filled small" id="updNow">Neu starten</button><button class="btn plain small" id="updLater">Später</button></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
