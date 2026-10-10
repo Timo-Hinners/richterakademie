@@ -1,0 +1,34 @@
+# Baut die Windows-Version und veröffentlicht sie als GitHub-Release.
+# Auslöser: ein Tag wie v1.3.1 – die installierten Apps holen sich das Update dann selbst.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Abhängigkeiten
+        run: npm install
+      - name: Version aus Tag prüfen
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "$TAG" != "$PKG" ]; then echo "Tag $TAG passt nicht zu package.json $PKG"; exit 1; fi
+      - name: Selbsttest Spracherkennung (Windows)
+        run: node -e "const s=require('sherpa-onnx-node'); console.log('sherpa ok', typeof s.OfflineRecognizer)"
+      - name: Bauen und veröffentlichen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win nsis --x64 --publish always
