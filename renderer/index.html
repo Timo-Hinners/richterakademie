@@ -26,6 +26,7 @@
     <p class="navlabel">Gericht</p>
     <button role="tab" data-t="rec" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Verhandlung<span class="live" id="liveDot" hidden></span></button>
     <button role="tab" data-t="akten" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/></svg>Akten</button>
+    <button role="tab" data-t="ur" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14.5 4.5 19.5 9.5M12 7l5 5M9.5 9.5l4.5 4.5M4 20l6.5-6.5M13 6l5 5-3 3-5-5z"/><path d="M4 20h7"/></svg>Urteil</button>
     <button role="tab" data-t="sw" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="4" rx="1"/><rect x="3" y="14" width="11" height="4" rx="1"/><path d="M17 16h4"/></svg>Schwärzen</button>
     <p class="navlabel">App</p>
     <button role="tab" data-t="set" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>Einstellungen</button>
@@ -185,7 +186,7 @@
     <div class="card glass" id="vEdit" hidden><textarea id="mdEdit" rows="24"></textarea></div>
     <div class="card glass" id="vTrans" hidden><div id="transOut" class="trans"></div></div>
     <div class="actionbar glass">
-      <div class="row"><button class="btn filled" id="genReport">Akte mit KI schreiben</button><button class="btn tinted" id="reTrans">Neu transkribieren</button></div>
+      <div class="row"><button class="btn filled" id="genReport">Akte mit KI schreiben</button><button class="btn tinted" id="reTrans">Neu transkribieren</button><button class="btn tinted" id="toUrteil">Urteil erstellen</button></div>
       <div class="row"><span class="actlabel">Teilen</span><button class="btn tinted small" id="expPdf">PDF</button><button class="btn tinted small" id="expMd">Text</button><button class="btn tinted small" id="copyUrteil">Urteil kopieren</button><button class="btn tinted small" id="toSw">Geschwärzt</button><span class="spacer"></span><button class="btn destructive-text small" id="delCase">Löschen</button></div>
     </div>
     <p class="sub" id="caseMsg"></p>
@@ -213,6 +214,50 @@
     <div class="card glass paper"><div id="swPreview" class="swprev"></div></div>
     <div class="row actions"><button class="btn filled" id="swSave">Als Bild speichern</button><button class="btn tinted" id="swCopy">Bild kopieren</button></div>
   </div>
+</section>
+
+<section id="ur" hidden>
+  <header class="pagehead"><p class="eyebrow">Gericht</p><h1>Urteil</h1><p class="lead">Angeklagte, Tatvorwürfe und Strafe eintragen – Tenor, Rechtsmittelbelehrung und Unterschrift entstehen automatisch. Fertig als PDF.</p></header>
+
+  <div class="card glass">
+    <div class="grid">
+      <label class="field"><span>Akte</span><select id="urCase"></select></label>
+      <label class="field"><span>Aktenzeichen</span><input id="urAz" placeholder="68857"></label>
+      <label class="field"><span>Verfahren</span><select id="urArt"><option>Hauptverhandlung</option><option>Eilverfahren</option><option>SG-Urteil</option><option>Revisionsverfahren</option><option>Zivilverfahren</option></select></label>
+    </div>
+    <div class="grid">
+      <label class="field"><span>Dokument</span><select id="urDok"><option>Urteil</option><option>Beschluss</option></select></label>
+      <label class="field"><span>Ort</span><input id="urOrt" value="Los Santos"></label>
+      <label class="field"><span>Datum</span><input id="urDatum" type="date"></label>
+    </div>
+    <div class="grid">
+      <label class="field"><span>Staatsanwaltschaft (optional)</span><input id="urSta" placeholder="Name"></label>
+      <label class="field"><span>Verteidigung (optional)</span><input id="urVert" placeholder="Name"></label>
+    </div>
+  </div>
+
+  <h2 class="grouptitle">Angeklagte</h2>
+  <div id="urDefs"></div>
+  <button class="btn tinted" id="urAddDef">+ Angeklagte Person</button>
+
+  <h2 class="grouptitle">Begründung</h2>
+  <div class="card glass">
+    <label class="field"><span>Beweismittel und Zeugen</span><textarea id="urBeweise" rows="3" placeholder="z. B. Aussage Sveni Bonte (Geschädigter), Bodycam Officer …, Einlassung der Angeklagten"></textarea></label>
+    <label class="field"><span>Beweiswürdigung</span><textarea id="urBw" rows="6" placeholder="Was steht fest, welche Aussagen sind glaubhaft, was ist nicht nachgewiesen?"></textarea></label>
+    <label class="field"><span>Rechtliche Würdigung und Strafzumessung</span><textarea id="urRw" rows="6" placeholder="Pro Vorwurf: Tatbestand und Paragraph. Danach: mildernde und schärfende Umstände."></textarea></label>
+    <label class="field"><span>Weitere Massnahmen (optional)</span><textarea id="urMass" rows="2" placeholder="z. B. Suspendierung, Disziplinarverfahren, Einziehung"></textarea></label>
+    <div class="row actions"><button class="btn filled" id="urAi">Begründung mit KI schreiben</button><button class="btn tinted" id="urTpl">Gerüst einfügen</button><span class="hint" id="urAiMsg"></span></div>
+  </div>
+
+  <h2 class="grouptitle">Rechtsmittelbelehrung</h2>
+  <div class="card glass">
+    <textarea id="urRmb" rows="3"></textarea>
+    <div class="row opts-row"><label class="toggle"><input type="checkbox" id="urZahl" checked><i></i>Zahlungsfrist 3 Tage in den Tenor</label><label class="toggle"><input type="checkbox" id="urSiegel" checked><i></i>Siegel im Dokument</label></div>
+  </div>
+
+  <h2 class="grouptitle">Vorschau</h2>
+  <div class="card paper urpaper"><div id="urPreview" class="urdoc"></div></div>
+  <div class="row actions"><button class="btn filled" id="urPdf">Als PDF sichern</button><button class="btn tinted" id="urCopy">Text kopieren</button><button class="btn tinted" id="urSw">Geschwärzt teilen</button><span class="hint" id="urMsg"></span></div>
 </section>
 
 <section id="set" hidden>
@@ -259,5 +304,6 @@
 <div class="updbar glass" id="updBar" hidden><span id="updText">Update bereit</span><button class="btn filled small" id="updNow">Neu starten</button><button class="btn plain small" id="updLater">Später</button></div>
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script src="urteil.js"></script>
 </body>
 </html>

@@ -119,6 +119,11 @@ ipcMain.handle('cases:get', (e, id) => { try { return JSON.parse(fs.readFileSync
 ipcMain.handle('cases:save', (e, c) => {
   ensureDirs();
   if (c.strafe) { c.strafe.he = clamp(c.strafe.he, MAX_HE); c.strafe.geld = clamp(c.strafe.geld, MAX_GELD); }
+  if (c.urteil && Array.isArray(c.urteil.defs)) for (const d of c.urteil.defs) {
+    if (d.he !== '' && d.he != null) d.he = clamp(d.he, MAX_HE);
+    if (d.geld !== '' && d.geld != null) d.geld = clamp(d.geld, MAX_GELD);
+    for (const k of d.counts || []) { if (k.he !== '' && k.he != null) k.he = clamp(k.he, MAX_HE); if (k.geld !== '' && k.geld != null) k.geld = clamp(k.geld, MAX_GELD); }
+  }
   fs.writeFileSync(caseFile(c.id), JSON.stringify(c, null, 2));
   return true;
 });
@@ -386,6 +391,42 @@ const offlineMsg = e => /ENOTFOUND|ECONN|ETIMEDOUT|net::/.test(String(e && e.mes
 ipcMain.handle('update:state', () => Object.assign({ current: app.getVersion(), enabled: !!updater }, updState));
 ipcMain.handle('update:check', async () => { if (!updater) return { state: 'disabled' }; try { await updater.checkForUpdates(); } catch (e) { sendUpd({ state: 'error', error: offlineMsg(e) }); } return updState; });
 ipcMain.handle('update:install', () => { if (updater && updState.state === 'ready') { setImmediate(() => updater.quitAndInstall(true, true)); return true; } return false; });
+
+/* ---------- Urteil: Begründung über Claude ---------- */
+ipcMain.handle('urteil:ai', async (e, d) => {
+  const key = dec(readSettings().claudeKey);
+  if (!key) throw new Error('Kein Claude-API-Schlüssel hinterlegt (Einstellungen).');
+  const s = publicSettings();
+  const prompt = `Du bist Richter am Department of Justice in Corleone City (GTA-Roleplay-Server) und schreibst die Begründung für ein ${d.dok || 'Urteil'} auf Deutsch – sachlich, im Stil eines deutschen Strafurteils, aber gut lesbar.
+
+Der TENOR steht bereits fest und darf NICHT verändert oder wiederholt werden:
+${(d.angeklagte || []).map((a, i) => `${i + 1}. ${a.tenor}`).join('\n')}
+
+Strukturierte Angaben: ${JSON.stringify({ verfahren: d.art, aktenzeichen: d.az, beweismittel: d.beweise, angeklagte: d.angeklagte.map(a => ({ name: a.name, anrede: a.anrede, vorwuerfe: a.vorwuerfe, hafteinheiten: a.hafteinheiten, geldstrafe: a.geldstrafe, bewaehrung: a.bewaehrung })) })}
+${d.notizen ? 'Notizen/Entwurf des Richters (übernehmen und ausbauen):\n' + d.notizen + '\n' : ''}${d.akte && (d.akte.bericht || d.akte.transkript) ? `Material aus der Akte:\n${d.akte.bericht}\n${d.akte.notizen || ''}\nTranskript (automatisch erkannt, Hörfehler möglich):\n${String(d.akte.transkript).slice(0, 12000)}\n` : ''}
+${RULES}
+
+Schreibe zwei Abschnitte:
+1. "bw" = Beweiswürdigung: kurz die Beweismittel, dann gegliedert nach "1. <Name>", Einzelvorwürfe mit a), b), c): was steht fest, welche Angaben sind glaubhaft, widersprüchliche Angaben abwägen. Bei "Nicht nachgewiesen"/"Freispruch" begründen, warum kein sicherer Tatnachweis vorliegt. Abschliessend eine zusammenfassende Würdigung.
+2. "rw" = Rechtliche Würdigung: gegliedert nach "1. <Name>", pro Schuldspruch Tatbestand mit Paragraph und kurzer Begründung; dann "Strafzumessung" mit mildernden/schärfenden Umständen, die GENAU das im Tenor festgelegte Strafmass begründet${(d.angeklagte || []).some(a => a.bewaehrung !== 'nein') ? ' (inkl. Begründung der Bewährung)' : ''}.
+Erfinde keine Tatsachen, die nicht aus den Angaben oder dem Material hervorgehen; wo etwas fehlt, formuliere neutral. Keine Markdown-Überschriften, kein Fettdruck. Nenne niemals ein höheres Strafmass als im Tenor.
+Antworte NUR mit JSON: {"bw":"...","rw":"..."}`;
+  const r = await fetch(process.env.RA_CLAUDE_URL || 'https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({ model: s.claudeModel, max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
+  });
+  if (!r.ok) {
+    if (r.status === 401) throw new Error('Claude-API-Schlüssel ungültig.');
+    if (r.status === 404) throw new Error('Claude-Modell „' + s.claudeModel + '“ nicht gefunden. In den Einstellungen anpassen.');
+    throw new Error('Claude-API ' + r.status);
+  }
+  const j = await r.json();
+  const out = (j.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+  const m = out.match(/\{[\s\S]*\}/);
+  try { const o = JSON.parse(m ? m[0] : out); return { bw: String(o.bw || '').replace(/\*\*/g, ''), rw: String(o.rw || '').replace(/\*\*/g, '') }; }
+  catch { throw new Error('Antwort der KI konnte nicht gelesen werden – bitte nochmal versuchen.'); }
+});
 
 /* ---------- Export ---------- */
 ipcMain.handle('export:pdf', async (e, html, name) => {

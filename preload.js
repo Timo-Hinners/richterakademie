@@ -33,5 +33,6 @@ contextBridge.exposeInMainWorld('api', {
   updateCheck: () => ipcRenderer.invoke('update:check'),
   updateInstall: () => ipcRenderer.invoke('update:install'),
   onUpdate: fn => ipcRenderer.on('update', (e, d) => fn(d)),
+  urteilAi: data => ipcRenderer.invoke('urteil:ai', data),
   openExternal: url => ipcRenderer.invoke('open:external', url)
 });

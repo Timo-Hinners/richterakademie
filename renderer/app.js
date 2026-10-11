@@ -29,7 +29,7 @@ document.querySelectorAll('#themeSeg button').forEach(b => b.onclick = async () 
 });
 
 /* ================= Navigation ================= */
-const SECTIONS = ['pfad', 'quiz', 'ref', 'tools', 'rec', 'akten', 'sw', 'set'];
+const SECTIONS = ['pfad', 'quiz', 'ref', 'tools', 'rec', 'akten', 'ur', 'sw', 'set'];
 const tabs = [...document.querySelectorAll('nav button')];
 function show(t) {
   tabs.forEach(b => { b.setAttribute('aria-selected', b.dataset.t === t); if (b.dataset.t === t) b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); });
@@ -38,6 +38,7 @@ function show(t) {
   if (t === 'akten' && !CUR) loadCaseList();
   if (t === 'set') { refreshModel(); loadBackup(); }
   if (t === 'sw') fillSwCases();
+  if (t === 'ur' && typeof urEnsure === 'function') urEnsure();
 }
 tabs.forEach(b => b.onclick = () => show(b.dataset.t));
 
